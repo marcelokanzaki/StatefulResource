@@ -39,7 +39,7 @@ describe('StatefulResource', function() {
       $httpBackend.flush()
     })
 
-    it('accepts a hash of options to use in the query string', function() {
+    it('accepts a hash of options to be used as params in the query string', function() {
       $httpBackend.expectGET('/issues').respond(null)
       var issues = new StatefulResource('/issues')
       $httpBackend.flush()
