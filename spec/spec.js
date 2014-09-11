@@ -50,17 +50,6 @@ describe('StatefulResource', function() {
       $httpBackend.flush()
     })
 
-    it('accepts a hash of options to use in the query string', function() {
-      $httpBackend.expectGET('/issues').respond(null)
-      var issues = new StatefulResource('/issues')
-      $httpBackend.flush()
-      expect(issues.models).toBeNull()
-
-      $httpBackend.expectGET('/issues?foo=bar').respond(null)
-      issues.query({foo: 'bar'})
-      $httpBackend.flush()
-    })
-
     xit('replaces an existing param in the query string', function() {
       $httpBackend.expectGET('/issues?foo=bar').respond(null)
       var issues = new StatefulResource('/issues?foo=bar')
