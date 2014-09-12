@@ -40,21 +40,21 @@ describe('StatefulResource', function() {
       expect(issues.models).toBeNull()
     })
 
-    xit('appends options to the query string', function() {
+    it('appends options to the query string', function() {
       var issues = new StatefulResource('/issues')
 
-      $httpBackend.expectGET('/issues?foo=bar').respond(null)
-      issues.query({foo: 'bar'})
+      $httpBackend.expectGET('/issues?a=b').respond(null)
+      issues.query({a: 'b'})
       $httpBackend.flush()
 
-      $httpBackend.expectGET('/issues?foo=bar&another=appended').respond(null)
-      issues.query({another: 'appended'})
+      $httpBackend.expectGET(/\/issues\?([ac]=[bd]&?){2}/).respond(null)
+      issues.query({c: 'd'})
       $httpBackend.flush()
 
       expect(issues.models).toBeNull()
     })
 
-    xit('replaces an existing param in the query string', function() {
+    it('replaces an existing param in the query string', function() {
       var issues = new StatefulResource('/issues')
 
       $httpBackend.expectGET('/issues?foo=bar').respond(null)
@@ -68,7 +68,7 @@ describe('StatefulResource', function() {
       expect(issues.models).toBeNull()
     })
 
-    xit('removes an option from the query string when its value is null or undefined', function() {
+    it('removes an option from the query string when its value is null or undefined', function() {
       var issues = new StatefulResource('/issues')
 
       $httpBackend.expectGET('/issues?foo=bar').respond(null)

@@ -1,8 +1,10 @@
 angular.module('statefulresource', [])
 
 .factory('StatefulResource', function($http) {
+  var _queryParams = {}
+
   var _statefulParams = function(paramsToMergeAndStore) {
-    return paramsToMergeAndStore
+    return angular.extend(_queryParams, paramsToMergeAndStore)
   }
 
   var StatefulResource = function(endpoint, options) {
