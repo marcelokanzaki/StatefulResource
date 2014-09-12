@@ -19,53 +19,29 @@ describe('StatefulResource', function() {
     $httpBackend = _$httpBackend_
   }))
 
-  it('queries an endpoint upon instantiation', function() {
-    $httpBackend.expectGET('/issues').respond(_.where(issuesFactory, {state: 'open'}))
-
-    var issues = new StatefulResource('/issues')
-    $httpBackend.flush()
-    expect(issues.models).toEqual(_.where(issuesFactory, {state: 'open'}))
-  })
-
   describe('#query', function() {
     it('issues a GET request', function() {
-      $httpBackend.expectGET('/issues').respond(null)
       var issues = new StatefulResource('/issues')
-      $httpBackend.flush()
-      expect(issues.models).toBeNull()
 
       $httpBackend.expectGET('/issues').respond(null)
       issues.query()
       $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
     })
 
     it('accepts a hash of options to be used as params in the query string', function() {
-      $httpBackend.expectGET('/issues').respond(null)
       var issues = new StatefulResource('/issues')
-      $httpBackend.flush()
-      expect(issues.models).toBeNull()
 
       $httpBackend.expectGET('/issues?foo=bar').respond(null)
       issues.query({foo: 'bar'})
       $httpBackend.flush()
-    })
 
-    xit('replaces an existing param in the query string', function() {
-      $httpBackend.expectGET('/issues?foo=bar').respond(null)
-      var issues = new StatefulResource('/issues?foo=bar')
-      $httpBackend.flush()
       expect(issues.models).toBeNull()
-
-      $httpBackend.expectGET('/issues?foo=somethingelse').respond(null)
-      issues.query({foo: 'somethingelse'})
-      $httpBackend.flush()
     })
 
     xit('appends options to the query string', function() {
-      $httpBackend.expectGET('/issues').respond(null)
       var issues = new StatefulResource('/issues')
-      $httpBackend.flush()
-      expect(issues.models).toBeNull()
 
       $httpBackend.expectGET('/issues?foo=bar').respond(null)
       issues.query({foo: 'bar'})
@@ -74,17 +50,36 @@ describe('StatefulResource', function() {
       $httpBackend.expectGET('/issues?foo=bar&another=appended').respond(null)
       issues.query({another: 'appended'})
       $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
+    })
+
+    xit('replaces an existing param in the query string', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET('/issues?foo=bar').respond(null)
+      issues.query({foo: 'bar'})
+      $httpBackend.flush()
+
+      $httpBackend.expectGET('/issues?foo=somethingelse').respond(null)
+      issues.query({foo: 'somethingelse'})
+      $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
     })
 
     xit('removes an option from the query string when its value is null or undefined', function() {
+      var issues = new StatefulResource('/issues')
+
       $httpBackend.expectGET('/issues?foo=bar').respond(null)
-      var issues = new StatefulResource('/issues?foo=bar')
+      issues.query({foo: 'bar'})
       $httpBackend.flush()
-      expect(issues.models).toBeNull()
 
       $httpBackend.expectGET('/issues').respond(null)
       issues.query({foo: null})
       $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
     })
   })
 })

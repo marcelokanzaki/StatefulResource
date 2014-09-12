@@ -9,8 +9,6 @@ angular.module('statefulresource', [])
     this.models = []
     this.endpoint = endpoint
     this.options = angular.extend({}, options)
-
-    this.query()
   }
 
   StatefulResource.prototype.query = function(params) {
@@ -20,6 +18,8 @@ angular.module('statefulresource', [])
     .success(function(data) {
       self.models = data
     })
+
+    return this
   }
 
   return StatefulResource
