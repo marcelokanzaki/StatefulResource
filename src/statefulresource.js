@@ -57,8 +57,6 @@ angular.module('statefulresource', [])
       if (headersGetter().link) {
         pages = LinkHeaderParser.parse( headersGetter().link )
 
-        console.log(pages)
-
         self.currentPage = (pages['next'] || pages['last'])['number'] - 1
         self.nextPage = pages['next'] && pages['next']['number']
         self.prevPage = pages['prev'] && pages['prev']['number']
