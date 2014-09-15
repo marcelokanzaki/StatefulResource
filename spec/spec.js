@@ -81,5 +81,49 @@ describe('StatefulResource', function() {
 
       expect(issues.models).toBeNull()
     })
+
+    it('extracts pagination info from the Link Header', function() {
+      var issues = new StatefulResource('/issues')
+
+      expect(issues.currentPage).toBeFalsy()
+      expect(issues.nextPage).toBeFalsy()
+      expect(issues.prevPage).toBeFalsy()
+      expect(issues.firstPage).toBeFalsy()
+      expect(issues.lastPage).toBeFalsy()
+
+      $httpBackend.expectGET('/issues').respond(null, {'Link': '<http://api.com/issues?page=2>; rel="next", <http://api.com/issues?page=10>; rel="last"'})
+      issues.query()
+      $httpBackend.flush()
+
+      expect(issues.currentPage).toEqual(1)
+      expect(issues.nextPage).toEqual(2)
+      expect(issues.prevPage).toBeFalsy()
+      expect(issues.firstPage).toBeFalsy()
+      expect(issues.lastPage).toEqual(10)
+    })
+  })
+
+  describe('#paginate', function() {
+    it('issues a GET request', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET(/\/issues.*/).respond(null)
+      issues.paginate()
+      $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
+    })
+
+    it('fetches the next page', function() {
+      $httpBackend.expectGET('/issues').respond(null, {'Link': '<http://api.com/issues?page=3>; rel="next", <http://api.com/issues?page=1>; rel="prev", <http://api.com/issues?page=1>; rel="first", <http://api.com/issues?page=10>; rel="last"'})
+      var issues = new StatefulResource('/issues').query()
+      $httpBackend.flush()
+
+      expect(issues.currentPage).toEqual(2)
+      expect(issues.nextPage).toEqual(3)
+      expect(issues.prevPage).toEqual(1)
+      expect(issues.firstPage).toEqual(1)
+      expect(issues.lastPage).toEqual(10)
+    })
   })
 })
