@@ -38,12 +38,11 @@ angular.module('statefulresource', [])
     return angular.extend(this.params, paramsToMergeAndStore)
   }
 
-  var StatefulResource = function(endpoint, options) {
+  var StatefulResource = function(endpoint) {
     this.models = []
     this.endpoint = endpoint
     this.params = {}
     this.pages = {}
-    this.options = angular.extend({}, options)
   }
 
   StatefulResource.prototype.query = function(params) {
