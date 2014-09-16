@@ -10,7 +10,7 @@ Usage
 Lets say you want to build something like GitHub Issues using AngularJS...
 
 ```javascript
-var issues = new SatefulResource('/issues') // GET /issues
+var issues = new SatefulResource('/issues').query() // GET /issues
 issues.models // bindable issues array
 
 issues.query({state: 'closed'}) // GET /issues?state=closed
