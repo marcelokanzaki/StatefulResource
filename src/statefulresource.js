@@ -85,7 +85,11 @@ angular.module('statefulresource', [])
     if (this.pages.next && !_awaitingQuery) {
       _awaitingQuery = true
 
-      this.query({page: this.pages.next.number}, options.append && function(data) {
+      this.query({
+        page: this.pages.next.number
+      }, {
+        forget: options.append && ['page'] || []
+      }, options.append && function(data) {
         return this.models.concat(data)
       })
     }

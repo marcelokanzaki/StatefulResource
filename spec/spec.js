@@ -176,6 +176,8 @@ describe('StatefulResource', function() {
       $httpBackend.flush()
 
       expect(issues.models).toEqual(['1', '2'])
+      // when in append mode, the page param should be forgotten
+      expect(issues.params['page']).not.toBeDefined()
     })
 
     it('performs requests in a blocking way', function() {
