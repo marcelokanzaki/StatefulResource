@@ -82,6 +82,13 @@ describe('StatefulResource', function() {
       expect(issues.models).toBeNull()
     })
 
+    it('is chainable', function() {
+      var issues       = new StatefulResource('/issues'),
+          sameInstance = issues.query()
+
+      expect(issues).toBe(sameInstance)
+    })
+
     it('extracts pagination info from the Link Header', function() {
       var issues = new StatefulResource('/issues')
 
