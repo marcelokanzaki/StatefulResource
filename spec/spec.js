@@ -82,6 +82,25 @@ describe('StatefulResource', function() {
       expect(issues.models).toBeNull()
     })
 
+    it('accepts a callback to which is passed the data returned from the server', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET('/issues').respond(['a', 'b'])
+      issues.query({}, function(data) {
+        return data.concat(['c', 'd'])
+      })
+      $httpBackend.flush()
+
+      // callback passed as the first argument
+      $httpBackend.expectGET('/issues').respond(['a', 'b'])
+      issues.query(function(data) {
+        return data.concat(['c', 'd'])
+      })
+      $httpBackend.flush()
+
+      expect(issues.models).toEqual(['a', 'b', 'c', 'd'])
+    })
+
     it('is chainable', function() {
       var issues       = new StatefulResource('/issues'),
           sameInstance = issues.query()

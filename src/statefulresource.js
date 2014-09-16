@@ -50,6 +50,8 @@ angular.module('statefulresource', [])
   StatefulResource.prototype.query = function(params, callback) {
     var self = this
 
+    callback = angular.isFunction(params) && params || callback
+
     $http.get(this.endpoint, {params: _statefulParams.call(this, params)})
     .success(function(data, status, headersGetter) {
       self.models = callback ? callback.call(self, data) : data
