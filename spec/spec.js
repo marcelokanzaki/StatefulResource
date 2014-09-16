@@ -107,13 +107,20 @@ describe('StatefulResource', function() {
     it('issues a GET request for the next page when it has pagination info', function() {
       var issues = new StatefulResource('/issues')
 
-      $httpBackend.expectGET('/issues').respond(null, {'Link': '<http://api.com/issues?page=2>; rel="next", <http://api.com/issues?page=10>; rel="last"'})
+      var firstPageResults = _.initial(issuesFactory, 2)
+      var secondPageResults = _.rest(issuesFactory, 2)
+
+      $httpBackend.expectGET('/issues').respond(firstPageResults, {'Link': '<http://api.com/issues?page=2>; rel="next", <http://api.com/issues?page=10>; rel="last"'})
       issues.query()
       $httpBackend.flush()
 
-      $httpBackend.expectGET('/issues?page=2').respond(null, {'Link': '<http://api.com/issues?page=3>; rel="next", <http://api.com/issues?page=10>; rel="last"'})
+      expect(issues.models).toEqual(firstPageResults)
+
+      $httpBackend.expectGET('/issues?page=2').respond(secondPageResults, {'Link': '<http://api.com/issues?page=3>; rel="next", <http://api.com/issues?page=10>; rel="last"'})
       issues.paginate()
       $httpBackend.flush()
+
+      expect(issues.models).toEqual(secondPageResults)
 
       $httpBackend.expectGET('/issues?page=3').respond(null)
       issues.paginate()
