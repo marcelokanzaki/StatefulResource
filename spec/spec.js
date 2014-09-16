@@ -145,6 +145,24 @@ describe('StatefulResource', function() {
       expect(issues.models).toEqual(['1', '2'])
     })
 
+    it('performs requests in a blocking way', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET('/issues').respond(null, {'Link': '<http://api.com/issues?page=2>; rel="next", <http://api.com/issues?page=10>; rel="last"'})
+      issues.query()
+      $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
+
+      $httpBackend.expectGET('/issues?page=2').respond(null)
+      issues.paginate()
+      issues.paginate()
+      issues.paginate()
+      issues.paginate()
+      $httpBackend.flush()
+      $httpBackend.verifyNoOutstandingExpectation()
+    })
+
     it('does nothing when there is no pagination info', function() {
       var issues = new StatefulResource('/issues')
       issues.paginate()

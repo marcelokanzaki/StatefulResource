@@ -38,6 +38,8 @@ angular.module('statefulresource', [])
     return angular.extend(this.params, paramsToMergeAndStore)
   }
 
+  var _awaitingQuery = false
+
   var StatefulResource = function(endpoint) {
     this.models = []
     this.endpoint = endpoint
@@ -51,6 +53,7 @@ angular.module('statefulresource', [])
     $http.get(this.endpoint, {params: _statefulParams.call(this, params)})
     .success(function(data, status, headersGetter) {
       self.models = callback ? callback.call(self, data) : data
+      _awaitingQuery = false
 
       if (headersGetter().link) {
         self.pages = LinkHeaderParser.parse( headersGetter().link )
@@ -63,7 +66,9 @@ angular.module('statefulresource', [])
   StatefulResource.prototype.paginate = function(options) {
     options = options || {}
 
-    if (this.pages.next) {
+    if (this.pages.next && !_awaitingQuery) {
+      _awaitingQuery = true
+
       this.query({page: this.pages.next.number}, options.append && function(data) {
         return this.models.concat(data)
       })
