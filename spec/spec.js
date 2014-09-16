@@ -101,6 +101,20 @@ describe('StatefulResource', function() {
       expect(issues.models).toEqual(['a', 'b', 'c', 'd'])
     })
 
+    it('optionally forgets params after executing a query with them', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET('/issues?foo=bar').respond(null)
+      issues.query({foo: 'bar'}, {forget: ['foo']})
+      $httpBackend.flush()
+
+      $httpBackend.expectGET('/issues').respond(null)
+      issues.query()
+      $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
+    })
+
     it('is chainable', function() {
       var issues       = new StatefulResource('/issues'),
           sameInstance = issues.query()

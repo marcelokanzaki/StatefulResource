@@ -34,8 +34,18 @@ angular.module('statefulresource', [])
 })
 
 .factory('StatefulResource', function($http, LinkHeaderParser) {
-  var _statefulParams = function(paramsToMergeAndStore) {
-    return angular.extend(this.params, paramsToMergeAndStore)
+  var _statefulParams = function(paramsToMergeAndStore, paramsToForget) {
+    var paramsToUse = {}
+
+    angular.extend(paramsToUse, this.params, paramsToMergeAndStore)
+
+    angular.forEach(paramsToForget, function(param) {
+      delete paramsToMergeAndStore[param]
+    })
+
+    angular.extend(this.params, paramsToMergeAndStore)
+
+    return paramsToUse
   }
 
   var _awaitingQuery = false
@@ -47,12 +57,16 @@ angular.module('statefulresource', [])
     this.pages = {}
   }
 
-  StatefulResource.prototype.query = function(params, callback) {
+  StatefulResource.prototype.query = function(params, options, callback) {
     var self = this
 
-    callback = angular.isFunction(params) && params || callback
+    angular.forEach(arguments, function(arg) {
+      callback = angular.isFunction(arg) && arg || callback
+    })
 
-    $http.get(this.endpoint, {params: _statefulParams.call(this, params)})
+    options = options || {}
+
+    $http.get(this.endpoint, {params: _statefulParams.call(this, params, options.forget)})
     .success(function(data, status, headersGetter) {
       self.models = callback ? callback.call(self, data) : data
       _awaitingQuery = false
