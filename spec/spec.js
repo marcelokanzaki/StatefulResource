@@ -129,6 +129,22 @@ describe('StatefulResource', function() {
       expect(issues.models).toBeNull()
     })
 
+    it('optionally appends models', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET('/issues').respond(['1'], {'Link': '<http://api.com/issues?page=2>; rel="next", <http://api.com/issues?page=10>; rel="last"'})
+      issues.query()
+      $httpBackend.flush()
+
+      expect(issues.models).toEqual(['1'])
+
+      $httpBackend.expectGET('/issues?page=2').respond(['2'], {'Link': '<http://api.com/issues?page=3>; rel="next", <http://api.com/issues?page=10>; rel="last"'})
+      issues.paginate({append: true})
+      $httpBackend.flush()
+
+      expect(issues.models).toEqual(['1', '2'])
+    })
+
     it('does nothing when there is no pagination info', function() {
       var issues = new StatefulResource('/issues')
       issues.paginate()

@@ -45,12 +45,12 @@ angular.module('statefulresource', [])
     this.pages = {}
   }
 
-  StatefulResource.prototype.query = function(params) {
+  StatefulResource.prototype.query = function(params, callback) {
     var self = this
 
     $http.get(this.endpoint, {params: _statefulParams.call(this, params)})
     .success(function(data, status, headersGetter) {
-      self.models = data
+      self.models = callback ? callback.call(self, data) : data
 
       if (headersGetter().link) {
         self.pages = LinkHeaderParser.parse( headersGetter().link )
@@ -60,9 +60,13 @@ angular.module('statefulresource', [])
     return this
   }
 
-  StatefulResource.prototype.paginate = function() {
+  StatefulResource.prototype.paginate = function(options) {
+    options = options || {}
+
     if (this.pages.next) {
-      this.query({page: this.pages.next.number})
+      this.query({page: this.pages.next.number}, options.append && function(data) {
+        return this.models.concat(data)
+      })
     }
   }
 
