@@ -115,6 +115,16 @@ describe('StatefulResource', function() {
       expect(issues.models).toBeNull()
     })
 
+    it('ignores pagination when filtering', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET('/issues?foo=bar').respond(null)
+      issues.query({foo: 'bar', page: 10})
+      $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
+    })
+
     it('is chainable', function() {
       var issues       = new StatefulResource('/issues'),
           sameInstance = issues.query()

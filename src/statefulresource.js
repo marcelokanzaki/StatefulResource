@@ -35,15 +35,30 @@ angular.module('statefulresource', [])
 
 .factory('StatefulResource', function($http, LinkHeaderParser) {
   var _statefulParams = function(paramsToMergeAndStore, paramsToForget) {
-    var paramsToUse = {}
+    var isRefreshing, isFiltering, isPaginating,
+        paramsToUse = {}
 
+    paramsToMergeAndStore = paramsToMergeAndStore || {}
+
+    isRefreshing = angular.equals({}, paramsToMergeAndStore)
+    isPaginating = !!paramsToMergeAndStore['page']
+    isFiltering  = Object.keys(paramsToMergeAndStore).length > (isPaginating ? 1 : 0)
+
+    // fetch and merge
     angular.extend(paramsToUse, this.params, paramsToMergeAndStore)
 
+    // foreget
     angular.forEach(paramsToForget, function(param) {
       delete paramsToMergeAndStore[param]
     })
 
+    // store
     angular.extend(this.params, paramsToMergeAndStore)
+
+    if (isFiltering && isPaginating) {
+      delete this.params['page']
+      delete paramsToUse['page']
+    }
 
     return paramsToUse
   }
