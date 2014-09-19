@@ -69,8 +69,8 @@
 
       <div class="panel panel-default" infinite-scroll="issues.paginate({append: true})">
         <div class="panel-heading">
-          <a ng-click="issues.query({state: 'open'})" class="state-switch" ng-class="{active: issues.params.state !== 'closed'}"><i class="fa fa-exclamation-circle"></i> Open</a>
-          <a ng-click="issues.query({state: 'closed'})" class="state-switch" ng-class="{active: issues.params.state === 'closed'}"><i class="fa fa-check"></i> Closed</a>
+          <a ng-click="issues.filter({state: 'open'})" class="state-switch" ng-class="{active: issues.params.state !== 'closed'}"><i class="fa fa-exclamation-circle"></i> Open</a>
+          <a ng-click="issues.filter({state: 'closed'})" class="state-switch" ng-class="{active: issues.params.state === 'closed'}"><i class="fa fa-check"></i> Closed</a>
 
           <div class="filters">
 
@@ -78,7 +78,7 @@
             <span class="dropdown">
               <a href="#" class="dropdown-toggle">Labels <span class="caret"></span></a>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li><a ng-click="issues.query({labels: null})"><i>None</i></a></li>
+                <li><a ng-click="issues.filter({labels: null})"><i>None</i></a></li>
                 <li ng-repeat="label in labels.models" ng-class="{selected: isLabelSelected(label)}">
                   <a ng-click="selectLabel(label)">{{label.name}}</a>
                 </li>
@@ -89,9 +89,9 @@
             <span class="dropdown">
               <a href="#" class="dropdown-toggle">Milestones <span class="caret"></span></a>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li><a ng-click="issues.query({milestone: null})"><i>None</i></a></li>
+                <li><a ng-click="issues.filter({milestone: null})"><i>None</i></a></li>
                 <li ng-repeat="milestone in milestones.models" ng-class="{selected: issues.params.milestone === milestone.number}">
-                  <a ng-click="issues.query({milestone: milestone.number})">{{milestone.title}}</a>
+                  <a ng-click="issues.filter({milestone: milestone.number})">{{milestone.title}}</a>
                 </li>
               </ul>
             </span>
@@ -100,9 +100,9 @@
             <span class="dropdown">
               <a href="#" class="dropdown-toggle">Assignee <span class="caret"></span></a>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li><a ng-click="issues.query({assignee: null})"><i>Nobody</i></a></li>
+                <li><a ng-click="issues.filter({assignee: null})"><i>Nobody</i></a></li>
                 <li ng-repeat="assignee in assignees.models" ng-class="{selected: issues.params.assignee === assignee.login}">
-                  <a ng-click="issues.query({assignee: assignee.login})">@{{assignee.login}}</a>
+                  <a ng-click="issues.filter({assignee: assignee.login})">@{{assignee.login}}</a>
                 </li>
               </ul>
             </span>
@@ -111,12 +111,12 @@
             <span class="dropdown">
               <a href="#" class="dropdown-toggle">Sort <span class="caret"></span></a>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li ng-class="{selected: !issues.params.sort && !issues.params.direction}"><a ng-click="issues.query({sort: null, direction: null})">Newest</a></li>
-                <li ng-class="{selected: !issues.params.sort && issues.params.direction === 'asc'}"><a ng-click="issues.query({sort: null, direction: 'asc'})">Oldest</a></li>
-                <li ng-class="{selected: issues.params.sort === 'comments' && !issues.params.direction}"><a ng-click="issues.query({sort: 'comments', direction: null})">Most commented</a></li>
-                <li ng-class="{selected: issues.params.sort === 'comments' && issues.params.direction === 'asc'}"><a ng-click="issues.query({sort: 'comments', direction: 'asc'})">Least commented</a></li>
+                <li ng-class="{selected: !issues.params.sort && !issues.params.direction}"><a ng-click="issues.filter({sort: null, direction: null})">Newest</a></li>
+                <li ng-class="{selected: !issues.params.sort && issues.params.direction === 'asc'}"><a ng-click="issues.filter({sort: null, direction: 'asc'})">Oldest</a></li>
+                <li ng-class="{selected: issues.params.sort === 'comments' && !issues.params.direction}"><a ng-click="issues.filter({sort: 'comments', direction: null})">Most commented</a></li>
+                <li ng-class="{selected: issues.params.sort === 'comments' && issues.params.direction === 'asc'}"><a ng-click="issues.filter({sort: 'comments', direction: 'asc'})">Least commented</a></li>
                 <li ng-class="{selected: issues.params.sort === 'updated' && !issues.params.direction}"><a ng-click="issues.query({sort: 'updated', direction: null})">Recently updated</a></li>
-                <li ng-class="{selected: issues.params.sort === 'updated' && issues.params.direction === 'asc'}"><a ng-click="issues.query({sort: 'updated', direction: 'asc'})">Least recently updated</a></li>
+                <li ng-class="{selected: issues.params.sort === 'updated' && issues.params.direction === 'asc'}"><a ng-click="issues.filter({sort: 'updated', direction: 'asc'})">Least recently updated</a></li>
               </ul>
             </span>
           </div>
@@ -183,7 +183,7 @@
             labelNames.push(label.name)
           }
 
-          $scope.issues.query({labels: labelNames.join()})
+          $scope.issues.filter({labels: labelNames.join()})
         }
       })
     </script>

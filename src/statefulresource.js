@@ -34,7 +34,7 @@ angular.module('statefulresource', [])
 })
 
 .factory('StatefulResource', function($http, LinkHeaderParser) {
-  var _statefulParams = function(paramsToMergeAndStore, paramsToForget) {
+  var _statefulParams = function(paramsToMergeAndStore) {
     var isRefreshing, isFiltering, isPaginating,
         paramsToUse = {}
 
@@ -47,11 +47,6 @@ angular.module('statefulresource', [])
     // fetch and merge
     angular.extend(paramsToUse, this.params, paramsToMergeAndStore)
 
-    // foreget
-    angular.forEach(paramsToForget, function(param) {
-      delete paramsToMergeAndStore[param]
-    })
-
     // store
     angular.extend(this.params, paramsToMergeAndStore)
 
@@ -63,25 +58,12 @@ angular.module('statefulresource', [])
     return paramsToUse
   }
 
-  var _awaitingQuery = false
-
-  var StatefulResource = function(endpoint) {
-    this.models = []
-    this.endpoint = endpoint
-    this.params = {}
-    this.pages = {}
-  }
-
-  StatefulResource.prototype.query = function(params, options, callback) {
+  var _fetch = function(params, callback) {
     var self = this
 
-    angular.forEach(arguments, function(arg) {
-      callback = angular.isFunction(arg) && arg || callback
-    })
+    callback = callback || angular.isFunction(params) && params
 
-    options = options || {}
-
-    $http.get(this.endpoint, {params: _statefulParams.call(this, params, options.forget)})
+    $http.get(this.endpoint, {params: _statefulParams.call(this, params)})
     .success(function(data, status, headersGetter) {
       self.models = callback ? callback.call(self, data) : data
       _awaitingQuery = false
@@ -94,17 +76,29 @@ angular.module('statefulresource', [])
     return this
   }
 
-  StatefulResource.prototype.paginate = function(options) {
-    options = options || {}
+  var _awaitingQuery = false
 
+  var StatefulResource = function(endpoint) {
+    this.models = []
+    this.endpoint = endpoint
+    this.params = {}
+    this.pages = {}
+  }
+
+  StatefulResource.prototype.query = function(callback) {
+    return _fetch.call(this, {}, callback)
+  }
+
+  StatefulResource.prototype.filter = function(params, callback) {
+    return _fetch.call(this, params, callback)
+  }
+
+  StatefulResource.prototype.paginate = function(append) {
     if (this.pages.next && !_awaitingQuery) {
       _awaitingQuery = true
 
-      this.query({
-        page: this.pages.next.number
-      }, {
-        forget: options.append && ['page'] || []
-      }, options.append && function(data) {
+      _fetch.call(this, {page: this.pages.next.number}, append && function(data) {
+        delete this.params['page']
         return this.models.concat(data)
       })
     }

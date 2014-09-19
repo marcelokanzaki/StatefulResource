@@ -20,78 +20,9 @@ describe('StatefulResource', function() {
   }))
 
   describe('#query', function() {
-    it('issues a GET request', function() {
+    it('accepts a callback function', function() {
       var issues = new StatefulResource('/issues')
 
-      $httpBackend.expectGET('/issues').respond(null)
-      issues.query()
-      $httpBackend.flush()
-
-      expect(issues.models).toBeNull()
-    })
-
-    it('accepts a hash of options to be used as params in the query string', function() {
-      var issues = new StatefulResource('/issues')
-
-      $httpBackend.expectGET('/issues?foo=bar').respond(null)
-      issues.query({foo: 'bar'})
-      $httpBackend.flush()
-
-      expect(issues.models).toBeNull()
-    })
-
-    it('appends options to the query string', function() {
-      var issues = new StatefulResource('/issues')
-
-      $httpBackend.expectGET('/issues?a=b').respond(null)
-      issues.query({a: 'b'})
-      $httpBackend.flush()
-
-      $httpBackend.expectGET(/\/issues\?([ac]=[bd]&?){2}/).respond(null)
-      issues.query({c: 'd'})
-      $httpBackend.flush()
-
-      expect(issues.models).toBeNull()
-    })
-
-    it('replaces an existing param in the query string', function() {
-      var issues = new StatefulResource('/issues')
-
-      $httpBackend.expectGET('/issues?foo=bar').respond(null)
-      issues.query({foo: 'bar'})
-      $httpBackend.flush()
-
-      $httpBackend.expectGET('/issues?foo=somethingelse').respond(null)
-      issues.query({foo: 'somethingelse'})
-      $httpBackend.flush()
-
-      expect(issues.models).toBeNull()
-    })
-
-    it('removes an option from the query string when its value is null or undefined', function() {
-      var issues = new StatefulResource('/issues')
-
-      $httpBackend.expectGET('/issues?foo=bar').respond(null)
-      issues.query({foo: 'bar'})
-      $httpBackend.flush()
-
-      $httpBackend.expectGET('/issues').respond(null)
-      issues.query({foo: null})
-      $httpBackend.flush()
-
-      expect(issues.models).toBeNull()
-    })
-
-    it('accepts a callback to which is passed the data returned from the server', function() {
-      var issues = new StatefulResource('/issues')
-
-      $httpBackend.expectGET('/issues').respond(['a', 'b'])
-      issues.query({}, function(data) {
-        return data.concat(['c', 'd'])
-      })
-      $httpBackend.flush()
-
-      // callback passed as the first argument
       $httpBackend.expectGET('/issues').respond(['a', 'b'])
       issues.query(function(data) {
         return data.concat(['c', 'd'])
@@ -101,30 +32,6 @@ describe('StatefulResource', function() {
       expect(issues.models).toEqual(['a', 'b', 'c', 'd'])
     })
 
-    it('optionally forgets params after executing a query with them', function() {
-      var issues = new StatefulResource('/issues')
-
-      $httpBackend.expectGET('/issues?foo=bar').respond(null)
-      issues.query({foo: 'bar'}, {forget: ['foo']})
-      $httpBackend.flush()
-
-      $httpBackend.expectGET('/issues').respond(null)
-      issues.query()
-      $httpBackend.flush()
-
-      expect(issues.models).toBeNull()
-    })
-
-    it('ignores pagination when filtering', function() {
-      var issues = new StatefulResource('/issues')
-
-      $httpBackend.expectGET('/issues?foo=bar').respond(null)
-      issues.query({foo: 'bar', page: 10})
-      $httpBackend.flush()
-
-      expect(issues.models).toBeNull()
-    })
-
     it('is chainable', function() {
       var issues       = new StatefulResource('/issues'),
           sameInstance = issues.query()
@@ -132,7 +39,7 @@ describe('StatefulResource', function() {
       expect(issues).toBe(sameInstance)
     })
 
-    it('extracts pagination info from the Link Header', function() {
+    it('extracts pagination info from response', function() {
       var issues = new StatefulResource('/issues')
 
       expect(issues.pages).toEqual({})
@@ -146,8 +53,79 @@ describe('StatefulResource', function() {
     })
   })
 
+  describe('#filter', function() {
+    it('keeps track of request params', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET('/issues?a=b').respond(null)
+      issues.filter({a: 'b'})
+      $httpBackend.flush()
+
+      $httpBackend.expectGET(/\/issues\?([ac]=[bd]&?){2}/).respond(null)
+      issues.filter({c: 'd'})
+      $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
+    })
+
+    it('allows param overriding', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET('/issues?foo=bar').respond(null)
+      issues.filter({foo: 'bar'})
+      $httpBackend.flush()
+
+      $httpBackend.expectGET('/issues?foo=somethingelse').respond(null)
+      issues.filter({foo: 'somethingelse'})
+      $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
+    })
+
+    it('allows param removal', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET('/issues?foo=bar').respond(null)
+      issues.filter({foo: 'bar'})
+      $httpBackend.flush()
+
+      // when setting to null...
+      $httpBackend.expectGET('/issues').respond(null)
+      issues.filter({foo: null})
+      $httpBackend.flush()
+
+      $httpBackend.expectGET('/issues?foo=bar').respond(null)
+      issues.filter({foo: 'bar'})
+      $httpBackend.flush()
+
+      // ...or undefined
+      $httpBackend.expectGET('/issues').respond(null)
+      issues.filter({foo: undefined})
+      $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
+    })
+
+    it('ignores pagination', function() {
+      var issues = new StatefulResource('/issues')
+
+      $httpBackend.expectGET('/issues?foo=bar').respond(null)
+      issues.filter({foo: 'bar', page: 10})
+      $httpBackend.flush()
+
+      expect(issues.models).toBeNull()
+    })
+
+    it('is chainable', function() {
+      var issues       = new StatefulResource('/issues'),
+          sameInstance = issues.filter()
+
+      expect(issues).toBe(sameInstance)
+    })
+  })
+
   describe('#paginate', function() {
-    it('issues a GET request for the next page when it has pagination info', function() {
+    it('fetches the next page', function() {
       var issues = new StatefulResource('/issues')
 
       var firstPageResults = _.initial(issuesFactory, 2)
@@ -182,7 +160,7 @@ describe('StatefulResource', function() {
       expect(issues.models).toEqual(['1'])
 
       $httpBackend.expectGET('/issues?page=2').respond(['2'], {'Link': '<http://api.com/issues?page=3>; rel="next", <http://api.com/issues?page=10>; rel="last"'})
-      issues.paginate({append: true})
+      issues.paginate(true)
       $httpBackend.flush()
 
       expect(issues.models).toEqual(['1', '2'])
